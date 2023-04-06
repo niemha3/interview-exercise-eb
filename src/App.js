@@ -1,13 +1,17 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { ethers }  from "ethers"
-import erc20ABI from './erc20ABI.json'
-import mainErc20ABI from './mainErc20ABI.json'
+import veQIErc20ABI from './veQIErc20ABI.json'
+import gaugeControllerErc20ABI from './gaugeControllerErc20ABI.json'
+import BigNumber from 'bignumber.js'
 
  const App = () => {
 
-  const proxyContractAddress = "0x7Ee65Fdc1C534A6b4f9ea2Cc3ca9aC8d6c602aBd"
+  const veQiProxyContract = "0x7Ee65Fdc1C534A6b4f9ea2Cc3ca9aC8d6c602aBd"
   const addressOfMainContract = "0xeb4eE988D975A91f02884076717D5EeACb41976f"
+
+  const gaugeControllerProxyContract ="0x14593cb3Ffe270a72862Eb08CeB57Bc3D4DdC16C"
+
 
  
   const [wallet, setWallet] = useState('')
@@ -17,33 +21,46 @@ import mainErc20ABI from './mainErc20ABI.json'
  
 
   useEffect(() => {
+    
     const fetchData = async () => {
       requestAccount()
       const provider = new ethers.providers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc")
-      const contract = new ethers.Contract(proxyContractAddress, mainErc20ABI, provider) 
+      const veQicontract = new ethers.Contract(veQiProxyContract, veQIErc20ABI, provider) 
+      const gaugeControllerContract = new ethers.Contract(gaugeControllerProxyContract, gaugeControllerErc20ABI, provider)
     
-      const tokenName = await contract.name()
-      const myBalance = await contract.balanceOf(wallet.toString())
-   
+    
+      // Name of the token
+      const tokenName = await veQicontract.name()
+
+      // Balance of my veQI
+      let myBalance = await veQicontract.balanceOf("0x5c65afe884c92a046d80284b642b44a67c49c664")
+
+      //TODO: Users votes, 5.getUserVotesLength
+      console.log("gaugecontroller contract", gaugeControllerContract)
+      
+      const myVotes = await gaugeControllerContract.getUserVotesLength()
+
+      console.log(myVotes)
+
+      //TODO: Total vote count for each validator
+
+      //TODO: relative weight for each validaer
+
+      
     //  const provider = new ethers.providers.Web3Provider(window.ethereum)
     //  const signer = provider.getSigner()
     //  const contract = new ethers.Contract(addressOfMainContract, erc20ABI, signer)
-    console.log("Contract ", contract)
-    console.log("My balance: ", myBalance)
+    console.log("veQIContract ", veQicontract)
+    console.log("Your veQI balance ", myBalance.toString())
 
     console.log("Token name", tokenName)
 
-    //  const implementationAddress = await proxyContract.implementation()
-
-  
-
-    //  console.log(implementationAddress)
-
     }
+
     fetchData()
   },[wallet])
 
-  console.log(veQiContractData)
+ 
   
   const requestAccount = async () => {
     if(window.ethereum) {
