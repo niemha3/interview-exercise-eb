@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { ethers }  from "ethers"
+import './App.css'
 import veQIErc20ABI from './veQIErc20ABI.json'
 import gaugeControllerErc20ABI from './gaugeControllerErc20ABI.json'
 import BigNumber from 'bignumber.js'
@@ -105,7 +106,7 @@ import BigNumber from 'bignumber.js'
   return (
     <div className="App">
       <div>
-        <h1> This is Avalanche</h1>
+        <h1 className="text-3xl underline "> This is Avalanche</h1>
         <button onClick={requestAccount}>Connect to wallet</button>
         <h3>Connected to wallet: {wallet} </h3>
 
