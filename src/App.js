@@ -1,8 +1,11 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { ethers }  from "ethers"
+import './App.css'
 import veQIErc20ABI from './veQIErc20ABI.json'
 import gaugeControllerErc20ABI from './gaugeControllerErc20ABI.json'
+import CryptoCard from './components/CryptoCard'
+import UserVeQIData from './components/UserVeQIData'
 import BigNumber from 'bignumber.js'
 
  const App = () => {
@@ -15,7 +18,8 @@ import BigNumber from 'bignumber.js'
 
  
   const [wallet, setWallet] = useState('')
-  const [veQiContractData, setVeQiContractData] = useState(null)
+  const [veQiBalance, setVeQiBalance] = useState(null)
+  const [veQiVotes, setVeQiVotes] = useState(null)
   
 
  
@@ -23,7 +27,7 @@ import BigNumber from 'bignumber.js'
   useEffect(() => {
     
     const fetchData = async () => {
-      requestAccount()
+    
       const provider = new ethers.providers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc")
       const veQicontract = new ethers.Contract(veQiProxyContract, veQIErc20ABI, provider) 
       const gaugeControllerContract = new ethers.Contract(gaugeControllerProxyContract, gaugeControllerErc20ABI, provider)
@@ -32,41 +36,42 @@ import BigNumber from 'bignumber.js'
       // Name of the token
       const tokenName = await veQicontract.name()
 
-      // Balance of my veQI
-      let myBalance = await veQicontract.balanceOf("0x5c65afe884c92a046d80284b642b44a67c49c664")
+      // Users veQI balance
+      const userVeQiBalance = await veQicontract.balanceOf(wallet)
+      setVeQiBalance(userVeQiBalance.toString())
 
-      //TODO: Users votes, 5.getUserVotesLength
+      //TODO: Users votes getUserVotesLength
       console.log("gaugecontroller contract", gaugeControllerContract)
       
-      const myVotes = await gaugeControllerContract.getUserVotesLength()
+      const userVeQiVotes = await gaugeControllerContract.getUserVotesLength()
 
-      console.log(myVotes)
+      setVeQiVotes(userVeQiVotes.toString())
 
       //TODO: Total vote count for each validator
 
       //TODO: relative weight for each validaer
 
-      
-    //  const provider = new ethers.providers.Web3Provider(window.ethereum)
-    //  const signer = provider.getSigner()
-    //  const contract = new ethers.Contract(addressOfMainContract, erc20ABI, signer)
     console.log("veQIContract ", veQicontract)
-    console.log("Your veQI balance ", myBalance.toString())
-
+    console.log("Your veQI balance ", userVeQiBalance)
+    
     console.log("Token name", tokenName)
-
-    }
-
+    
+  }
+  
+  if(wallet) {
     fetchData()
-  },[wallet])
+  }
+},[wallet])
 
- 
+
   
   const requestAccount = async () => {
     if(window.ethereum) {
       
       try {
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts"})
+
+        console.log("accounts:", accounts)
        
         setWallet(accounts[0])
 
@@ -79,45 +84,30 @@ import BigNumber from 'bignumber.js'
     }
   }
   
-
-  // const connectWallet = async () => {
-  //   if(typeof window.ethereum !== 'undefined') {
-  //     await requestAccount()
-
-  //     const provider = new ethers.providers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc")
-
-  //     const contract = new ethers.Contract(contractAddress, contractABI, provider)
-
-  //     const signer = provider.getSigner()
-
-  //     const balance = await contract.balanceOf(wallet);
-
-  //     console.log(`AVAX balance: ${ethers.utils.formatEther(balance)} AVAX`);
-    
-  //   }
-  // }
-  
-
-  
-  
+  console.log("Wallet address", wallet)
+  console.log('Users votes: ', veQiVotes)
+  console.log("Users balance: ", veQiBalance)
 
 
   return (
-    <div className="App">
-      <div>
-        <h1> This is Avalanche</h1>
-        <button onClick={requestAccount}>Connect to wallet</button>
-        <h3>Connected to wallet: {wallet} </h3>
+    <div className="App bg-gradient-to-b from-gray-900 to-blue-900
+    h-screen text-gray-100 font-serif w-auto h-screen ">
+
+      <div className="flex flex-col justify-center items-center py-3 px-8 w-30 h-10 mb-20 ">
+        <img className="object-cover h-48 w-96 mt-20" alt="logo" src="./BenqiWordmarkWhite.png" />
+        </div>
 
   
-          {/* <div>
-            {wallet ? (
-              <p>Connected to wallet with address: {wallet.address}</p>
-            )
-              :( <button onClick={connectWallet}>Connect to your wallet</button>
-            )}
-          </div> */}
-      </div>
+      <div className="flex flex-col justify-center items-center py-20"> 
+
+        {!wallet && <button className=" text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 border-transparent rounded  shadow-md border-2 border-gray-100 py-2 px-2 my-2" onClick={requestAccount}>Connect to wallet</button> }
+
+          {wallet &&
+          <> 
+            <CryptoCard walletAddress={wallet} />
+            <UserVeQIData veQiBalance={veQiBalance} veQiVotes={veQiVotes} />
+          </> }
+        </div>
     </div>
   );
 }
