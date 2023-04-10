@@ -15,6 +15,10 @@ import UserVeQIData from './components/UserVeQIData'
 
   const gaugeControllerProxyContract ="0x14593cb3Ffe270a72862Eb08CeB57Bc3D4DdC16C"
 
+  const provider = new ethers.providers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc")
+  const veQicontract = new ethers.Contract(veQiProxyContract, veQIErc20ABI, provider) 
+  const gaugeControllerContract = new ethers.Contract(gaugeControllerProxyContract, gaugeControllerErc20ABI, provider)
+
 
  
   const [wallet, setWallet] = useState('')
@@ -22,6 +26,9 @@ import UserVeQIData from './components/UserVeQIData'
   const [veQiVotes, setVeQiVotes] = useState(null)
   const [nodesList, setNodesList] = useState([])
   const [nodes, setNodes] = useState([])
+  const [nodeDataList, setNodeDataList] = useState([])
+
+
 
 
   
@@ -29,32 +36,50 @@ import UserVeQIData from './components/UserVeQIData'
 
   useEffect(() => {
 
-    const provider = new ethers.providers.JsonRpcProvider("https://api.avax.network/ext/bc/C/rpc")
-    const veQicontract = new ethers.Contract(veQiProxyContract, veQIErc20ABI, provider) 
-    const gaugeControllerContract = new ethers.Contract(gaugeControllerProxyContract, gaugeControllerErc20ABI, provider)
+
 
     /**
      * Get list of all nodes and set it to nodes state
      */
     const fetchListOfNodes = async () => {    
       const nodeCount = await gaugeControllerContract.getNodesLength()
-      console.log(nodeCount.toString())
+  
       const nodeIds = await gaugeControllerContract.getNodesRange(0, (nodeCount - 1).toString())
 
-      setNodes(nodeIds)
-      console.log("Nodes list: ", nodes)
-  
 
+
+       const newNodeObjects = await Promise.all(
+        nodeIds.map(async (nodeId) => {
+          const votesForNode = await gaugeControllerContract.getVotesForNode(nodeId)
+
+         return {
+          votes: votesForNode.toString(),
+          node: nodeId
+         }
+        
+         
+        })
+         )
+
+         const totalWeightOfValidators = nodeIds.map(async (nodeId) => {
+          const nodeWeight = await gaugeControllerContract.nodeUserVotedWeight(nodeId)
+         })
+          
+
+          setNodeDataList(newNodeObjects)
+        
      }
 
 
      /**
       * Get votes for one node
       */
-     const fetchVotesForNode = async () => {
+     const fetchDataForNodes = async () => {
 
-      const votesForNode = await gaugeControllerContract.getVotesForNode(nodes[0])
-    
+     
+
+   
+      
       // const nod = nodes.map(async (nodeId) => {
       //   const votesForNode = await gaugeControllerContract.getVotesForNode(nodeId)
       //   nodeObjects.push({
@@ -64,8 +89,8 @@ import UserVeQIData from './components/UserVeQIData'
       //   })
       // })
 
-      
-      console.log("Votes for node: ", votesForNode.toString())
+    
+    
      }
 
      const getRelativeWeightOfNode = async () => {
@@ -79,7 +104,8 @@ import UserVeQIData from './components/UserVeQIData'
     }
     
     fetchListOfNodes()
-    fetchVotesForNode()
+    // fetchDataForNodes()
+    // fetchVotesForNode()
     // getRelativeWeightOfNode()
 
     const fetchUsersData = async () => {
@@ -89,7 +115,7 @@ import UserVeQIData from './components/UserVeQIData'
       setVeQiBalance(userVeQiBalance.toString())
 
       //TODO: Users votes getUserVotesLength
-      console.log("gaugecontroller contract", gaugeControllerContract)
+      // console.log("gaugecontroller contract", gaugeControllerContract)
       
       const userVeQiVotes = await gaugeControllerContract.getUserVotesLength()
 
@@ -100,17 +126,7 @@ import UserVeQIData from './components/UserVeQIData'
   if(wallet) {
     fetchUsersData()
   }
-},[wallet, nodesList])
-
-
-
-
-
-       //TODO: relative weight for each validaer
-
-
-
-
+},[wallet])
   
   const requestAccount = async () => {
     if(window.ethereum) {
@@ -118,34 +134,37 @@ import UserVeQIData from './components/UserVeQIData'
       try {
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts"})
 
-        console.log("accounts:", accounts)
+        // console.log("accounts:", accounts)
        
         setWallet(accounts[0])
 
       } catch (error) {
-        console.log('Failed to connect')
+        // console.log('Failed to connect')
       }
     }
     else {
       alert('Please install Meta Mask extension')
     }
   }
-  
-  console.log("Wallet address", wallet)
-  console.log('Users votes: ', veQiVotes)
-  console.log("Users balance: ", veQiBalance)
+
+  console.log("Nodes list: ", nodes)
+  console.log("nodes data: ", nodeDataList)
+ 
+  // console.log("Wallet address", wallet)
+  // console.log('Users votes: ', veQiVotes)
+  // console.log("Users balance: ", veQiBalance)
 
 
   return (
     <div className="App bg-gradient-to-b from-gray-900 to-blue-900
-    h-screen text-gray-100 font-serif w-auto h-auto">
+    h-screen text-gray-100 font-serif w-full h-fit">
 
       <div className="flex flex-col justify-center items-center py-3 px-8 w-30 h-10 mb-20 ">
         <img className="object-cover h-48 w-96 mt-20" alt="logo" src="./BenqiWordmarkWhite.png" />
         </div>
 
   
-      <div className="flex flex-col justify-center items-center py-20 bg-gradient-to-b from-gray-900 to-blue-900"> 
+      <div className="flex flex-col justify-center items-center py-20 "> 
 
         {!wallet && <button className=" text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 border-transparent rounded  shadow-md border-2 border-gray-100 py-2 px-2 my-2" onClick={requestAccount}>Connect to wallet</button> }
 
@@ -156,11 +175,29 @@ import UserVeQIData from './components/UserVeQIData'
           </> }
         </div>
 
-        <div className="nodes bg-gradient-to-b from-gray-900 to-blue-900">
-          {nodes.map(node => (
-            <p key={node}>{node}</p>
-          ))}
-        </div>
+       
+          <table className="table-auto  w-40vw mt-8"> 
+            <thead>
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NodeId</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Votes </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">veQI Weight</th>
+              </tr>
+            </thead> 
+            <tbody>
+          
+              {nodeDataList.map((node, index) => (
+                <tr key={index}> 
+                <td key={node.node} className="border px-4 py-2 text-sm font-medium">{node.node}</td>
+                <td key={node.votes} className="border px-4 py-2 text-sm font-medium">{node.votes}</td>
+                <td key={index} className="border px-4 py-2 text-sm font-medium">2000</td> 
+                </tr>
+              ))}
+
+            </tbody>
+          </table>
+        
+
     </div>
   );
 }
