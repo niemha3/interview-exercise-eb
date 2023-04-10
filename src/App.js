@@ -25,7 +25,6 @@ import UserVeQIData from './components/UserVeQIData'
   const [veQiBalance, setVeQiBalance] = useState(null)
   const [veQiVotes, setVeQiVotes] = useState(null)
   const [nodesList, setNodesList] = useState([])
-  const [nodes, setNodes] = useState([])
   const [nodeDataList, setNodeDataList] = useState([])
 
 
@@ -42,14 +41,14 @@ import UserVeQIData from './components/UserVeQIData'
      * Get list of all nodes and set it to nodes state
      */
     const fetchListOfNodes = async () => {    
-      const nodeCount = await gaugeControllerContract.getNodesLength()
+      const nodesLength = await gaugeControllerContract.getNodesLength()
   
-      const nodeIds = await gaugeControllerContract.getNodesRange(0, (nodeCount - 1).toString())
+      const nodes = await gaugeControllerContract.getNodesRange(0, (nodesLength - 1).toString())
 
 
 
        const newNodeObjects = await Promise.all(
-        nodeIds.map(async (nodeId) => {
+        nodes.map(async (nodeId) => {
           const votesForNode = await gaugeControllerContract.getVotesForNode(nodeId)
 
          return {
@@ -61,15 +60,42 @@ import UserVeQIData from './components/UserVeQIData'
         })
          )
 
-         const totalWeightOfValidators = nodeIds.map(async (nodeId) => {
-          const nodeWeight = await gaugeControllerContract.nodeUserVotedWeight(nodeId)
-         })
-          
+         const nodesData = await Promise.all(
+          nodes.map(async (nodeId) => {
+            const node = nodeId
+            const votesForNode = await gaugeControllerContract.getVotesForNode(nodeId)
+            const totalVotes = await gaugeControllerContract.getUserVotesLength()
+            const nodeWeight = totalVotes > 0 ? (votesForNode / totalVotes) * 100 : 0
 
-          setNodeDataList(newNodeObjects)
+            return {
+              node,
+              votes: votesForNode.toString(),
+              weight: nodeWeight.toFixed(2)
+            }
+          })
+         )
+
+       
+
+         
+
+        //  const nodesWithAllData = []
+        //  for(let i = 0; i < newNodeObjects.length; i++) {
+        //   const nodeId = newNodeObjects[i].node
+        //   const nodeVotes = newNodeObjects[i].votes
+        //   const totalVotes = await gaugeControllerContract.getUserVotesLength()
+        //   const nodeWeight = totalVotes > 0 ? (nodeVotes / totalVotes) * 100 : 0
+          
+        //   nodesWithAllData[nodeId] = nodeWeight.toString()
+        //  }
+
+        //  console.log(nodesWithAllData)
+
+          setNodeDataList(nodesData)
         
      }
 
+     console.log(nodeDataList)
 
      /**
       * Get votes for one node
@@ -147,7 +173,6 @@ import UserVeQIData from './components/UserVeQIData'
     }
   }
 
-  console.log("Nodes list: ", nodes)
   console.log("nodes data: ", nodeDataList)
  
   // console.log("Wallet address", wallet)
