@@ -97,7 +97,7 @@ const App = () => {
     if (walletAddress) {
       fetchUsersData()
     }
-  }, [])
+  }, [walletAddress])
 
   /**
    * Connect user to metamask
@@ -139,7 +139,7 @@ const App = () => {
             Connect to wallet
           </button>
         )}
-      
+    
         {walletAddress && (
           <>
             <CryptoCard walletAddress={walletAddress} />
@@ -147,12 +147,8 @@ const App = () => {
           </>
         )}
 
-        {loading ?  <NodeDataTable nodeDataList={nodeDataList} /> : <button type="button" className="text-white mt-8" disabled>
-            Loading Nodes...
-          </button> }
+        {loading ?  <NodeDataTable nodeDataList={nodeDataList} /> : <button className="text-white"> Loading nodes...</button> }
       </div>
-
-
     </div>
   )
 }

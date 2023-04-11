@@ -1,4 +1,3 @@
-
     const NodeDataTable = ({ nodeDataList }) => {
 
         return (
@@ -31,15 +30,15 @@
                     <div key={index} className="block md:hidden text-xs text-white border-b border-gray-200 p-2">
                         <div key={node.node} className="my-2">
                             <p className="uppercase">NodeId</p>
-                            <p>{nodeDataList[0].node} </p>
+                            <p>{node.node} </p>
                         </div>
                         <div className="my-2">
                             <p className="uppercase">Votes</p>
-                            <p>{nodeDataList[0].votes} </p>
+                            <p>{node.votes} </p>
                         </div>
                         <div className="my-2">
                             <p className="uppercase">Weight</p>
-                            <p>{nodeDataList[0].weight} % </p>
+                            <p>{node.weight} % </p>
                         </div>
                     </div>
                     ))}

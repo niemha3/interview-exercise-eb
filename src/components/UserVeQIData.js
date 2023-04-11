@@ -1,5 +1,3 @@
-//TODO: Add veQI votes to table as props
-
 const UserVeQIData = ({ veQiBalance, veQiVotes}) => {
     return(
         <div>
