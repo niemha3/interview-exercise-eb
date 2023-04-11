@@ -8,8 +8,6 @@ import CryptoCard from './components/CryptoCard'
 import UserVeQIData from './components/UserVeQIData'
 import NodeDataTable from './components/NodeDataTable'
 
-
-
  const App = () => {
 
     const veQiProxyContract = "0x7Ee65Fdc1C534A6b4f9ea2Cc3ca9aC8d6c602aBd"
@@ -67,10 +65,6 @@ import NodeDataTable from './components/NodeDataTable'
             }
       }
 
-      console.log(nodeDataList)
-
-
-
       fetchListOfNodes()
   
       /**
@@ -89,13 +83,13 @@ import NodeDataTable from './components/NodeDataTable'
           console.error(`Error while fetching user data: ${error}`)
         }
       
-    }
+      }
     
       if(walletAddress) {
         fetchUsersData()
       }
 
-    },[walletAddress])
+    },[])
   
       /**
        * Connect user to metamask
@@ -110,43 +104,36 @@ import NodeDataTable from './components/NodeDataTable'
           } catch (error) {
             console.error(`Failed to connect account: ${error}`)
           }
-        }
-        else {
+        
+        } else {
+
           alert('Please install Meta Mask extension')
         }
       }
 
-  console.log("nodes data: ", nodeDataList)
+    return (
+      <div className="app bg-gradient-to-b from-gray-900 to-blue-900
+        text-gray-100 font-serif w-full min-h-screen">
 
-  return (
-    <div className="app bg-gradient-to-b from-gray-900 to-blue-900
-    text-gray-100 font-serif w-full min-h-screen">
-
-      <div className="flex flex-col justify-center items-center py-3 px-8 w-30 h-10 mb-20 ">
-        <img className="object-cover h-48 w-96 mt-20" alt="logo" src="./BenqiWordmarkWhite.png" />
-      </div>
-
-  
-      <div className="flex flex-col justify-center items-center py-20 overflow-y-auto"> 
-
-        {!walletAddress && <button className=" text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 border-transparent rounded  shadow-md border-2 border-gray-100 py-2 px-2 my-2" onClick={requestAccount}>Connect to wallet</button> }
-
-          {walletAddress &&
-          <> 
-            <CryptoCard walletAddress={walletAddress} />
-            <UserVeQIData veQiBalance={veQiBalance} veQiVotes={veQiVotes} />
-          </> }
-          
-         {nodeDataList && <NodeDataTable nodeDataList={nodeDataList} /> }
+        <div className="flex flex-col justify-center items-center py-3 px-8 w-30 h-10 mb-20 ">
+          <img className="object-cover h-48 w-96 mt-20" alt="logo" src="./BenqiWordmarkWhite.png" />
         </div>
 
+    
+        <div className="flex flex-col justify-center items-center py-20 overflow-y-auto"> 
 
-       
-      
-        
+          {!walletAddress && <button className=" text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 border-transparent rounded  shadow-md border-2 border-gray-100 py-2 px-2 my-2" onClick={requestAccount}>Connect to wallet</button> }
 
-    </div>
-  );
-}
+            {walletAddress &&
+            <> 
+              <CryptoCard walletAddress={walletAddress} />
+              <UserVeQIData veQiBalance={veQiBalance} veQiVotes={veQiVotes} />
+            </> }
+            
+          {nodeDataList && <NodeDataTable nodeDataList={nodeDataList} /> }
+          </div>
+      </div>
+    )
+  }
 
 export default App; 
