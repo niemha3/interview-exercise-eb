@@ -1,3 +1,8 @@
+/**
+ * Component to show users data after connecting to Metamask 
+ * @param {string} veQiBalance Users veQI balance
+ * @param {string} veQiVotes   Users veQI votes 
+ */
 const UserVeQIData = ({ veQiBalance, veQiVotes}) => {
     return(
         <div>

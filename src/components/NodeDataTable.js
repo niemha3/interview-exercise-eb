@@ -1,3 +1,7 @@
+    /**
+     * Component to show every nodes data
+     * @param {object} nodeDataList Node data object that includes nodeid, votes and weight data
+     */
     const NodeDataTable = ({ nodeDataList }) => {
 
         return (
