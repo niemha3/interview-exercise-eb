@@ -1,5 +1,7 @@
-
-
+/**
+ * Component to show for which address user is connected
+ * @param {string} walletAddress Users wallet address 
+ */
 const CryptoCard = ({ walletAddress }) => {
     return ( 
         <div className="flex justify-center items-center w-80 h-48vh mx-auto bg-gradient-to-r from-blue-500 to-indigo-800 rounded-lg shadow-lg hover:scale-105 ease-in-out duration-300">
